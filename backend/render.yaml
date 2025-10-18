@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: saferide-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saferide-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+
+databases:
+  - name: saferide-db
+    databaseName: saferide
+    user: saferide
