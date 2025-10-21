@@ -14,7 +14,6 @@ const Home = () => {
             {!isAuthenticated ? (
               <>
                 <Link to="/login" className="text-gray-300 hover:text-white">Login</Link>
-                <Link to="/signup" className="btn-primary">Sign Up</Link>
               </>
             ) : (
               <div className="flex items-center gap-4">
@@ -42,23 +41,9 @@ const Home = () => {
             Professional designated drivers at your service.
           </p>
           
-          {isAuthenticated ? (
-            <Link to="/request-trip" className="btn-primary text-lg px-8 py-4">
-              Request a Driver
-            </Link>
-          ) : (
-            <div className="space-x-4">
-              <Link to="/signup" className="btn-primary text-lg px-8 py-4">
-                Get Started as User
-              </Link>
-              <Link to="/signup?role=driver" className="btn-secondary text-lg px-8 py-4">
-                Become a Driver
-              </Link>
-              <Link to="/signup?role=admin" className="btn-secondary text-lg px-8 py-4">
-                Admin Access
-              </Link>
-            </div>
-          )}
+          <Link to="/request-trip" className="btn-primary text-lg px-8 py-4">
+            Request a Driver
+          </Link>
         </div>
 
         {/* Features */}

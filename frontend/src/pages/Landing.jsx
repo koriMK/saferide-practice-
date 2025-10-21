@@ -61,19 +61,7 @@ const Landing = () => {
                   </button>
                 </div>
               ) : (
-                <div className="relative">
-                  <button 
-                    onClick={() => setShowRegisterDropdown(!showRegisterDropdown)}
-                    className="text-gray-700 hover:text-gray-900 transition-colors"
-                  >
-                    Register
-                  </button>
-                  {showRegisterDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border">
-                      <Link to="/signup?role=driver" className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">Become a Driver</Link>
-                    </div>
-                  )}
-                </div>
+                <Link to="/login" className="text-gray-700 hover:text-gray-900 transition-colors">Login</Link>
               )}
             </div>
           </div>
@@ -121,11 +109,6 @@ const Landing = () => {
                         <Link to="/ride" className="bg-white hover:bg-gray-100 text-green-600 font-semibold px-6 py-3 rounded-full transition-colors inline-block text-center">Order a Driver</Link>
                       ) : (
                         <Link to="/login" className="bg-white hover:bg-gray-100 text-green-600 font-semibold px-6 py-3 rounded-full transition-colors inline-block text-center">Order a Driver</Link>
-                      )}
-                      {!isAuthenticated ? (
-                        <Link to="/signup" className="border-2 border-white hover:bg-white hover:text-green-600 text-white font-semibold px-6 py-3 rounded-full transition-colors inline-block text-center">Sign Up</Link>
-                      ) : (
-                        <Link to="/dashboard" className="border-2 border-white hover:bg-white hover:text-green-600 text-white font-semibold px-6 py-3 rounded-full transition-colors inline-block text-center">Go to Dashboard</Link>
                       )}
                     </div>
                   </div>
@@ -250,7 +233,7 @@ const Landing = () => {
               <h4 className="text-gray-900 text-sm font-semibold mb-2">Services</h4>
               <ul className="space-y-2">
                 <li><Link to="/ride" className="text-gray-600 hover:text-gray-900 hover:underline text-sm transition-colors">Request Driver</Link></li>
-                <li><Link to="/signup?role=driver" className="text-gray-600 hover:text-gray-900 hover:underline text-sm transition-colors">Become a Driver</Link></li>
+                <li><a href="#" className="text-gray-600 hover:text-gray-900 hover:underline text-sm transition-colors">Become a Driver</a></li>
                 <li><a href="#" className="text-gray-600 hover:text-gray-900 hover:underline text-sm transition-colors">Corporate Services</a></li>
                 <li><a href="#" className="text-gray-600 hover:text-gray-900 hover:underline text-sm transition-colors">Event Services</a></li>
               </ul>

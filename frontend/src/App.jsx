@@ -5,8 +5,9 @@ import About from './pages/About'
 import Support from './pages/Support'
 import Home from './pages/Home'
 import Login from './pages/Login'
-import TripView from './pages/TripView'
 import Signup from './pages/Signup'
+import TripView from './pages/TripView'
+
 import Dashboard from './pages/Dashboard'
 import Ride from './pages/Ride'
 import RequestTrip from './pages/RequestTrip'
@@ -28,6 +29,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />

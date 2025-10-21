@@ -46,6 +46,17 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const response = await authService.register(userData)
+    
+    // If registration includes access_token, auto-login the user
+    if (response.access_token && response.user) {
+      const token = response.access_token
+      const user = response.user
+      
+      localStorage.setItem('token', token)
+      cookieService.setUserSession(token, user)
+      setUser(user)
+    }
+    
     return response
   }
 

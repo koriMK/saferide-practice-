@@ -9,19 +9,46 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     data = request.get_json()
     
+    # Validate required fields
+    required_fields = ['name', 'email', 'password', 'phone']
+    for field in required_fields:
+        if not data.get(field):
+            return {'message': f'{field} is required'}, 400
+    
     if User.query.filter_by(email=data['email']).first():
         return {'message': 'Email already exists'}, 400
+    
+    # Validate role
+    role_str = data.get('role', 'user')
+    try:
+        role = UserRole(role_str)
+    except ValueError:
+        return {'message': 'Invalid role'}, 400
         
     user = User(
+        name=data['name'],
         email=data['email'],
+        phone=data['phone'],
         password_hash=generate_password_hash(data['password']),
-        role=UserRole(data.get('role', 'user'))
+        role=role
     )
     
     db.session.add(user)
     db.session.commit()
     
-    return {'message': 'User registered successfully'}, 201
+    # Create access token and return user data
+    access_token = create_access_token(identity=user.id)
+    return {
+        'message': 'User registered successfully',
+        'access_token': access_token,
+        'user': {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'phone': user.phone,
+            'role': user.role.value
+        }
+    }, 201
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -34,7 +61,9 @@ def login():
             'access_token': access_token,
             'user': {
                 'id': user.id,
+                'name': user.name,
                 'email': user.email,
+                'phone': user.phone,
                 'role': user.role.value
             }
         }

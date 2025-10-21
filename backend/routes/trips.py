@@ -3,20 +3,13 @@ from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, Trip, TripStatus, User
 from utils.decorators import admin_required
-from flasgger import swag_from
+# from flasgger import swag_from
 
 trips_bp = Blueprint('trips', __name__)
 api = Api(trips_bp)
 
 class TripResource(Resource):
     @jwt_required()
-    @swag_from({
-        'tags': ['Trips'],
-        'security': [{'Bearer': []}],
-        'responses': {
-            200: {'description': 'Trips retrieved successfully'}
-        }
-    })
     def get(self):
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
@@ -39,27 +32,6 @@ class TripResource(Resource):
         }
     
     @jwt_required()
-    @swag_from({
-        'tags': ['Trips'],
-        'security': [{'Bearer': []}],
-        'parameters': [
-            {
-                'name': 'body',
-                'in': 'body',
-                'required': True,
-                'schema': {
-                    'type': 'object',
-                    'properties': {
-                        'pickup_location': {'type': 'string'},
-                        'dropoff_location': {'type': 'string'}
-                    }
-                }
-            }
-        ],
-        'responses': {
-            201: {'description': 'Trip created successfully'}
-        }
-    })
     def post(self):
         data = request.get_json()
         user_id = get_jwt_identity()
@@ -78,32 +50,6 @@ class TripResource(Resource):
 
 class TripStatusResource(Resource):
     @jwt_required()
-    @swag_from({
-        'tags': ['Trips'],
-        'security': [{'Bearer': []}],
-        'parameters': [
-            {
-                'name': 'trip_id',
-                'in': 'path',
-                'type': 'integer',
-                'required': True
-            },
-            {
-                'name': 'body',
-                'in': 'body',
-                'required': True,
-                'schema': {
-                    'type': 'object',
-                    'properties': {
-                        'status': {'type': 'string', 'enum': ['accepted', 'in_progress', 'completed']}
-                    }
-                }
-            }
-        ],
-        'responses': {
-            200: {'description': 'Trip status updated'}
-        }
-    })
     def put(self, trip_id):
         data = request.get_json()
         trip = Trip.query.get_or_404(trip_id)
