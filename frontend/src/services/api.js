@@ -19,8 +19,24 @@ api.interceptors.request.use((config) => {
 })
 
 export const authService = {
-  login: (email, password) => api.post('/auth/login', { email, password }).then(res => res.data),
-  register: (userData) => api.post('/auth/register', userData).then(res => res.data),
+  login: async (email, password) => {
+    try {
+      const response = await api.post('/auth/login', { email, password })
+      return response.data
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || 'Login failed')
+    }
+  },
+  register: async (userData) => {
+    try {
+      const response = await api.post('/auth/register', userData)
+      return response.data
+    } catch (error) {
+      console.error('Register error:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || 'Registration failed')
+    }
+  },
 }
 
 export const tripService = {
@@ -47,7 +63,9 @@ export const mpesaService = {
   initiatePayment: (phoneNumber, amount, tripId) => 
     api.post('/api/mpesa/initiate-payment', { phone_number: phoneNumber, amount, trip_id: tripId }).then(res => res.data),
   queryPayment: (checkoutRequestId) => 
-    api.get(`/api/mpesa/query-payment/${checkoutRequestId}`).then(res => res.data)
+    api.get(`/api/mpesa/query-payment/${checkoutRequestId}`).then(res => res.data),
+  getPaymentHistory: () => 
+    api.get('/api/mpesa/payments').then(res => res.data)
 }
 
 export default api

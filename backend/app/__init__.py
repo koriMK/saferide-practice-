@@ -25,7 +25,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app)
+    CORS(app, origins=['http://localhost:5173', 'http://localhost:3000'], supports_credentials=True)
     
     # Swagger configuration (temporarily disabled)
     # swagger_config = {
@@ -47,13 +47,13 @@ def create_app():
     # Register blueprints
     from routes.auth import auth_bp
     from routes.trips import trips_bp
-    # from routes.mpesa import mpesa_bp
+    from routes.mpesa import mpesa_bp
     # from routes.upload import upload_bp
     # from routes.admin import admin_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(trips_bp, url_prefix='/api/trips')
-    # app.register_blueprint(mpesa_bp, url_prefix='/api/mpesa')
+    app.register_blueprint(mpesa_bp, url_prefix='/api/mpesa')
     # app.register_blueprint(upload_bp, url_prefix='/api/upload')
     # app.register_blueprint(admin_bp, url_prefix='/api/admin')
     

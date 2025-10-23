@@ -34,13 +34,13 @@ class TripResource(Resource):
     @jwt_required()
     def post(self):
         data = request.get_json()
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         
         trip = Trip(
             user_id=user_id,
             pickup_location=data['pickup_location'],
             dropoff_location=data['dropoff_location'],
-            fare=25.0  # Base fare
+            fare=data.get('fare', 25.0)
         )
         
         db.session.add(trip)
@@ -55,7 +55,7 @@ class TripStatusResource(Resource):
         trip = Trip.query.get_or_404(trip_id)
         
         # Only driver assigned to trip can update status
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         if trip.driver_id != current_user_id:
             return {'message': 'Unauthorized'}, 403
         

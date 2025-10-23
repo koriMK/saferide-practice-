@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -13,6 +13,11 @@ const Signup = () => {
     phone: '',
     role: role
   })
+  
+  // Update role when URL parameter changes
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, role }))
+  }, [role])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { register } = useAuth()
@@ -24,9 +29,11 @@ const Signup = () => {
     setError('')
 
     try {
+      console.log('Submitting registration data:', formData)
       await register(formData)
       navigate('/dashboard')
     } catch (err) {
+      console.error('Registration error:', err)
       setError(err.message || 'Registration failed')
     } finally {
       setLoading(false)

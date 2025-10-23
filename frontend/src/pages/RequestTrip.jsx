@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { tripService } from '../services/api'
+import { locationService } from '../services/locationService'
+import LocationInput from '../components/LocationInput'
 
 const TripSchema = Yup.object().shape({
   pickup_location: Yup.string().required('Pickup location is required'),
@@ -11,12 +13,47 @@ const TripSchema = Yup.object().shape({
 
 const RequestTrip = () => {
   const [error, setError] = useState('')
+  const [pickupLocation, setPickupLocation] = useState(null)
+  const [dropoffLocation, setDropoffLocation] = useState(null)
+  const [estimatedPrice, setEstimatedPrice] = useState(25)
+  const [routeInfo, setRouteInfo] = useState(null)
+  const [calculating, setCalculating] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (pickupLocation && dropoffLocation) {
+      calculatePrice()
+    }
+  }, [pickupLocation, dropoffLocation])
+
+  const calculatePrice = async () => {
+    setCalculating(true)
+    try {
+      const estimate = await locationService.getPriceEstimate(
+        `${pickupLocation.lat},${pickupLocation.lng}`,
+        `${dropoffLocation.lat},${dropoffLocation.lng}`
+      )
+      setEstimatedPrice(estimate.price)
+      setRouteInfo({
+        distance: estimate.distance.toFixed(1),
+        duration: Math.round(estimate.duration)
+      })
+    } catch (err) {
+      console.error('Price calculation failed:', err)
+      setEstimatedPrice(100) // Fallback price
+    } finally {
+      setCalculating(false)
+    }
+  }
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       setError('')
-      const response = await tripService.createTrip(values)
+      const tripData = {
+        ...values,
+        fare: estimatedPrice
+      }
+      const response = await tripService.createTrip(tripData)
       navigate(`/trip/${response.trip_id}`)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create trip')
@@ -64,12 +101,19 @@ const RequestTrip = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     📍 Pickup Location
                   </label>
-                  <Field
-                    name="pickup_location"
-                    type="text"
-                    className="input-field"
-                    placeholder="Where are you and your car?"
-                  />
+                  <Field name="pickup_location">
+                    {({ field, form }) => (
+                      <LocationInput
+                        placeholder="Where are you and your car?"
+                        value={field.value}
+                        onChange={(e) => form.setFieldValue('pickup_location', e.target.value)}
+                        onPlaceSelect={(place) => {
+                          form.setFieldValue('pickup_location', place.address)
+                          setPickupLocation(place)
+                        }}
+                      />
+                    )}
+                  </Field>
                   <ErrorMessage name="pickup_location" component="div" className="mt-1 text-sm text-red-600" />
                 </div>
 
@@ -77,32 +121,53 @@ const RequestTrip = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     🏠 Drop-off Location
                   </label>
-                  <Field
-                    name="dropoff_location"
-                    type="text"
-                    className="input-field"
-                    placeholder="Where should we drive you?"
-                  />
+                  <Field name="dropoff_location">
+                    {({ field, form }) => (
+                      <LocationInput
+                        placeholder="Where should we drive you?"
+                        value={field.value}
+                        onChange={(e) => form.setFieldValue('dropoff_location', e.target.value)}
+                        onPlaceSelect={(place) => {
+                          form.setFieldValue('dropoff_location', place.address)
+                          setDropoffLocation(place)
+                        }}
+                      />
+                    )}
+                  </Field>
                   <ErrorMessage name="dropoff_location" component="div" className="mt-1 text-sm text-red-600" />
                 </div>
+
+                {calculating && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-blue-800 text-sm">Calculating price...</p>
+                  </div>
+                )}
 
                 {/* Fare Estimate */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Estimated Fare</span>
-                    <span className="text-xl font-semibold">$25.00</span>
+                    <span className="text-xl font-semibold">KSh {estimatedPrice}</span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Base rate + distance. Final fare may vary.
-                  </p>
+                  {routeInfo && (
+                    <div className="text-sm text-gray-500 mt-1 space-y-1">
+                      <p>Distance: {routeInfo.distance} km • Duration: {routeInfo.duration} min</p>
+                      <p>Base rate + distance. Final fare may vary.</p>
+                    </div>
+                  )}
+                  {!routeInfo && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Select both locations to see accurate pricing.
+                    </p>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || calculating}
                   className="w-full btn-primary text-lg py-4 disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Requesting Driver...' : 'Request Driver'}
+                  {isSubmitting ? 'Requesting Driver...' : `Request Driver - KSh ${estimatedPrice}`}
                 </button>
               </Form>
             )}
